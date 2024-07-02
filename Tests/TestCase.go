@@ -6,7 +6,6 @@ import (
 	"github.com/nbj/go-repository/Repository"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"time"
 )
 
 func SetupEnvironment() {
@@ -29,6 +28,7 @@ func getSqliteDatabaseConnection() *gorm.DB {
 
 	modelsToMigrate := []any{
 		TestCaseModel{},
+		TestCaseRelationModel{},
 	}
 
 	if err = connection.AutoMigrate(modelsToMigrate...); nil != err {
@@ -40,22 +40,39 @@ func getSqliteDatabaseConnection() *gorm.DB {
 
 func seedTestData(connection *gorm.DB) {
 	numberOfEntries := 5
+	var instances []*TestCaseModel
 
 	for entry := 1; entry <= numberOfEntries; entry++ {
-		uniqueIdentifier, _ := uuid.NewV7()
-
-		instance := TestCaseModel{
-			Id:    uniqueIdentifier,
-			Value: fmt.Sprintf("Value [%d]", entry),
-		}
-
+		instance := makeTestCaseModel(fmt.Sprintf("Value [%d]", entry))
 		connection.Create(&instance)
+		instances = append(instances, &instance)
+	}
+
+	for index, instance := range instances {
+		relationInstance := makeTestCaseRelationModel(instance.Id, fmt.Sprintf("Relation Value [%d]", index))
+		connection.Create(&relationInstance)
 	}
 }
 
-type TestCaseModel struct {
-	Id        uuid.UUID `json:"id" gorm:"type:uuid;primaryKey;uniqueIndex"`
-	Value     string    `json:"value"`
-	CreatedAt time.Time `json:"created_at" gorm:"index;not null"`
-	UpdatedAt time.Time `json:"updated_at" gorm:"not null"`
+func makeTestCaseModel(value string) TestCaseModel {
+	uniqueIdentifier, _ := uuid.NewV7()
+
+	instance := TestCaseModel{
+		Id:    uniqueIdentifier,
+		Value: value,
+	}
+
+	return instance
+}
+
+func makeTestCaseRelationModel(testCaseModelId uuid.UUID, value string) TestCaseRelationModel {
+	uniqueIdentifier, _ := uuid.NewV7()
+
+	instance := TestCaseRelationModel{
+		Id:              uniqueIdentifier,
+		TestCaseModelId: testCaseModelId,
+		Value:           value,
+	}
+
+	return instance
 }

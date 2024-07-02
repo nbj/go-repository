@@ -33,6 +33,20 @@ func Test_a_repository_can_get_a_collection_of_all_entries(t *testing.T) {
 	require.Equal(t, 5, entries.Count())
 }
 
+func Test_a_repository_can_get_entries_with_relationships(t *testing.T) {
+	// Arrange
+	Tests.SetupEnvironment()
+
+	repository := Repository.Of[Tests.TestCaseModel]()
+
+	// Act
+	entry := repository.First()
+
+	// Assert
+	require.Equal(t, 1, len(entry.TestCaseRelationModels))
+	require.Equal(t, "*Tests.TestCaseRelationModel", reflect.TypeOf(entry.TestCaseRelationModels[0]).String())
+}
+
 func Test_a_repository_can_query_entries(t *testing.T) {
 	// Arrange
 	Tests.SetupEnvironment()
