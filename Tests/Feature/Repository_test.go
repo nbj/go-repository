@@ -81,3 +81,16 @@ func Test_a_repository_can_query_first_matching_conditions(t *testing.T) {
 	require.Equal(t, "Value [1]", entryA.Value)
 	require.Equal(t, "Value [5]", entryB.Value)
 }
+
+func Test_a_repository_can_initiate_a_query_builder(t *testing.T) {
+	// Arrange
+	Tests.SetupEnvironment()
+
+	repository := Repository.Of[Tests.TestCaseModel]()
+
+	// Act
+	builder := repository.Builder()
+
+	// Assert
+	require.Equal(t, "*Repository.QueryBuilder[github.com/nbj/go-repository/Tests.TestCaseModel]", reflect.TypeOf(builder).String())
+}

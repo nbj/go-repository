@@ -16,6 +16,7 @@ type WithRelationships interface {
 type Repository[T any] struct {
 	connection *gorm.DB
 	model      *T
+	query      *gorm.DB
 }
 
 type Config struct {
@@ -69,6 +70,16 @@ func (repository *Repository[T]) applyRelationships(query *gorm.DB) *gorm.DB {
 	}
 
 	return query
+}
+
+// Builder
+// Shorthand for starting a new query builder
+func (repository *Repository[T]) Builder() *QueryBuilder[T] {
+	var builder QueryBuilder[T]
+
+	builder.query = repository.connection
+
+	return &builder
 }
 
 // All
