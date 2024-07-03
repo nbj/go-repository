@@ -3,6 +3,7 @@ package Repository
 import (
 	"fmt"
 	"github.com/nbj/go-collections/Collection"
+	"github.com/nbj/go-paginator/Paginator"
 	"github.com/nbj/go-support/Support"
 	"gorm.io/gorm"
 )
@@ -21,6 +22,18 @@ func (builder *QueryBuilder[T]) With(query string, args ...any) *QueryBuilder[T]
 
 func (builder *QueryBuilder[T]) Where(query any, args ...any) *QueryBuilder[T] {
 	builder.query = builder.query.Where(query, args...)
+
+	return builder
+}
+
+func (builder *QueryBuilder[T]) Skip(skip int) *QueryBuilder[T] {
+	builder.query = builder.query.Offset(skip)
+
+	return builder
+}
+
+func (builder *QueryBuilder[T]) Take(take int) *QueryBuilder[T] {
+	builder.query = builder.query.Limit(take)
 
 	return builder
 }
@@ -62,6 +75,16 @@ func (builder *QueryBuilder[T]) Get() *Collection.Collection[T] {
 	}
 
 	return Collection.Collect(entries)
+}
+
+// Paginate
+// Executes the query and get a paginates results
+func (builder *QueryBuilder[T]) Paginate(page int, perPage int, path string) *Paginator.Paginator[T] {
+	return Paginator.Paginate[T](builder.query, &Paginator.Boundaries{
+		Page:    page,
+		PerPage: perPage,
+		Path:    path,
+	})
 }
 
 // First
