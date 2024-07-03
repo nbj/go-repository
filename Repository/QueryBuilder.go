@@ -13,6 +13,12 @@ type QueryBuilder[T any] struct {
 	orders []string
 }
 
+func (builder *QueryBuilder[T]) With(query string, args ...any) *QueryBuilder[T] {
+	builder.query = builder.query.Preload(query, args)
+
+	return builder
+}
+
 func (builder *QueryBuilder[T]) Where(query any, args ...any) *QueryBuilder[T] {
 	builder.query = builder.query.Where(query, args...)
 

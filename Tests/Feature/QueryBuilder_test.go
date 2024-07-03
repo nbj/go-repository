@@ -4,6 +4,7 @@ import (
 	"github.com/nbj/go-repository/Repository"
 	"github.com/nbj/go-repository/Tests"
 	"github.com/stretchr/testify/assert"
+	"reflect"
 	"testing"
 )
 
@@ -130,4 +131,19 @@ func Test_query_builder_can_check_if_entry_exists(t *testing.T) {
 	// Assert
 	assert.True(t, resultA)
 	assert.False(t, resultB)
+}
+
+func Test_query_builder_set_relationships_to_query(t *testing.T) {
+	// Arrange
+	Tests.SetupEnvironment()
+
+	repository := Repository.Of[Tests.TestCaseRelationModel]()
+
+	// Act
+	result := repository.Builder().
+		With("TestCaseModel").
+		Get()
+
+	// Assert
+	assert.Equal(t, "*Tests.TestCaseModel", reflect.TypeOf(result.First().TestCaseModel).String())
 }
