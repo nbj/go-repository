@@ -4,8 +4,8 @@ go 1.21.8
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/nbj/go-collections v1.0.0
-	github.com/nbj/go-paginator v1.0.0
+	github.com/nbj/go-collections v1.0.1
+	github.com/nbj/go-paginator v1.0.1
 	github.com/nbj/go-support v0.0.1
 	github.com/stretchr/testify v1.9.0
 	gorm.io/driver/sqlite v1.5.6
