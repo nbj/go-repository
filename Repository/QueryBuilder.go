@@ -2,7 +2,7 @@ package Repository
 
 import (
 	"fmt"
-	Nbj "github.com/nbj/go-collections"
+	"github.com/nbj/go-collections/Collection"
 	"github.com/nbj/go-support/Support"
 	"gorm.io/gorm"
 )
@@ -52,7 +52,7 @@ func (builder *QueryBuilder[T]) Exists() bool {
 
 // Get
 // Executes the query and get a collection containing all results
-func (builder *QueryBuilder[T]) Get() *Nbj.Collection[T] {
+func (builder *QueryBuilder[T]) Get() *Collection.Collection[T] {
 	var entries []T
 
 	builder.applyRelationships()
@@ -61,7 +61,7 @@ func (builder *QueryBuilder[T]) Get() *Nbj.Collection[T] {
 		return nil
 	}
 
-	return Nbj.Collect(entries)
+	return Collection.Collect(entries)
 }
 
 // First

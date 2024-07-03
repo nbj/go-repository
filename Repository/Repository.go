@@ -2,7 +2,7 @@ package Repository
 
 import (
 	"github.com/google/uuid"
-	Nbj "github.com/nbj/go-collections"
+	"github.com/nbj/go-collections/Collection"
 	"github.com/nbj/go-support/Support"
 	"gorm.io/gorm"
 	"log"
@@ -86,7 +86,7 @@ func (repository *Repository[T]) Builder() *QueryBuilder[T] {
 // All
 // Gets a collection of all entries in the repository.
 // Returns nil if query fails
-func (repository *Repository[T]) All() *Nbj.Collection[T] {
+func (repository *Repository[T]) All() *Collection.Collection[T] {
 	var entries []T
 
 	query := repository.connection
@@ -96,7 +96,7 @@ func (repository *Repository[T]) All() *Nbj.Collection[T] {
 		return nil
 	}
 
-	return Nbj.Collect(entries)
+	return Collection.Collect(entries)
 }
 
 // Create
@@ -129,7 +129,7 @@ func (repository *Repository[T]) Update(id uuid.UUID, values any) bool {
 // Takes a closure containing a gorm query, executes it and
 // returns the result as a collection of entries. Returns nil if
 // query fails
-func (repository *Repository[T]) Query(closure func(query *gorm.DB) *gorm.DB) *Nbj.Collection[T] {
+func (repository *Repository[T]) Query(closure func(query *gorm.DB) *gorm.DB) *Collection.Collection[T] {
 	var entries []T
 
 	query := closure(repository.connection)
@@ -139,7 +139,7 @@ func (repository *Repository[T]) Query(closure func(query *gorm.DB) *gorm.DB) *N
 		return nil
 	}
 
-	return Nbj.Collect(entries)
+	return Collection.Collect(entries)
 }
 
 // First
