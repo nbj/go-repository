@@ -55,7 +55,7 @@ func Test_a_repository_can_query_entries(t *testing.T) {
 	repository := Repository.Of[Tests.TestCaseModel]()
 
 	// Act
-	entries := repository.Query(func(query *gorm.DB) *gorm.DB {
+	entries := repository.GormQuery(func(query *gorm.DB) *gorm.DB {
 		return query.
 			Where("value IN ?", []string{"Value [2]", "Value [4]"})
 	})
@@ -90,7 +90,7 @@ func Test_a_repository_can_initiate_a_query_builder(t *testing.T) {
 	repository := Repository.Of[Tests.TestCaseModel]()
 
 	// Act
-	builder := repository.Builder()
+	builder := repository.Query()
 
 	// Assert
 	require.Equal(t, "*Repository.QueryBuilder[github.com/nbj/go-repository/Tests.TestCaseModel]", reflect.TypeOf(builder).String())

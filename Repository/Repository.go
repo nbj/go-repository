@@ -73,9 +73,9 @@ func (repository *Repository[T]) applyRelationships(query *gorm.DB) *gorm.DB {
 	return query
 }
 
-// Builder
+// Query
 // Shorthand for starting a new query builder
-func (repository *Repository[T]) Builder() *QueryBuilder[T] {
+func (repository *Repository[T]) Query() *QueryBuilder[T] {
 	var builder QueryBuilder[T]
 
 	builder.query = repository.connection
@@ -125,11 +125,11 @@ func (repository *Repository[T]) Update(id uuid.UUID, values any) bool {
 	return true
 }
 
-// Query
+// GormQuery
 // Takes a closure containing a gorm query, executes it and
 // returns the result as a collection of entries. Returns nil if
 // query fails
-func (repository *Repository[T]) Query(closure func(query *gorm.DB) *gorm.DB) *Collection.Collection[T] {
+func (repository *Repository[T]) GormQuery(closure func(query *gorm.DB) *gorm.DB) *Collection.Collection[T] {
 	var entries []T
 
 	query := closure(repository.connection)

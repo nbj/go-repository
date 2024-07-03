@@ -15,7 +15,7 @@ func Test_query_builder_can_get_a_collection_of_all_entries(t *testing.T) {
 	repository := Repository.Of[Tests.TestCaseModel]()
 
 	// Act
-	collection := repository.Builder().Get()
+	collection := repository.Query().Get()
 
 	// Assert
 	assert.Equal(t, 5, collection.Count())
@@ -28,7 +28,7 @@ func Test_query_builder_can_get_a_collection_of_entries_using_where(t *testing.T
 	repository := Repository.Of[Tests.TestCaseModel]()
 
 	// Act
-	collection := repository.Builder().
+	collection := repository.Query().
 		Where("value", "Value [1]").
 		OrWhere("value", "Value [3]").
 		Get()
@@ -46,7 +46,7 @@ func Test_query_builder_can_get_the_first_entry(t *testing.T) {
 	repository := Repository.Of[Tests.TestCaseModel]()
 
 	// Act
-	entry := repository.Builder().First()
+	entry := repository.Query().First()
 
 	// Assert
 	assert.Equal(t, "Value [1]", entry.Value)
@@ -59,7 +59,7 @@ func Test_query_builder_can_get_the_first_entry_using_where(t *testing.T) {
 	repository := Repository.Of[Tests.TestCaseModel]()
 
 	// Act
-	entry := repository.Builder().
+	entry := repository.Query().
 		Where("value", "Value [3]").
 		First()
 
@@ -80,7 +80,7 @@ func Test_query_builder_can_get_the_first_entry_or_fail(t *testing.T) {
 	repository := Repository.Of[Tests.TestCaseModel]()
 
 	// Act
-	repository.Builder().
+	repository.Query().
 		Where("value", "this-does-not-exist").
 		FirstOrFail()
 
@@ -95,7 +95,7 @@ func Test_query_builder_can_order_entries(t *testing.T) {
 	repository := Repository.Of[Tests.TestCaseModel]()
 
 	// Act
-	entries := repository.Builder().
+	entries := repository.Query().
 		OrderBy("value", "desc").
 		Get()
 
@@ -120,11 +120,11 @@ func Test_query_builder_can_check_if_entry_exists(t *testing.T) {
 	repository := Repository.Of[Tests.TestCaseModel]()
 
 	// Act
-	resultA := repository.Builder().
+	resultA := repository.Query().
 		Where("value", "Value [4]").
 		Exists()
 
-	resultB := repository.Builder().
+	resultB := repository.Query().
 		Where("value", "this-does-not-exist").
 		Exists()
 
@@ -140,7 +140,7 @@ func Test_query_builder_set_relationships_to_query(t *testing.T) {
 	repository := Repository.Of[Tests.TestCaseRelationModel]()
 
 	// Act
-	result := repository.Builder().
+	result := repository.Query().
 		With("TestCaseModel").
 		Get()
 
