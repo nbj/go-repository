@@ -1,6 +1,7 @@
 package Repository
 
 import (
+	"github.com/google/uuid"
 	Nbj "github.com/nbj/go-collections"
 	"github.com/nbj/go-support/Support"
 	"gorm.io/gorm"
@@ -96,6 +97,32 @@ func (repository *Repository[T]) All() *Nbj.Collection[T] {
 	}
 
 	return Nbj.Collect(entries)
+}
+
+// Create
+// Creates a new database entry
+func (repository *Repository[T]) Create(value T) *T {
+	if result := repository.connection.Create(&value); result.Error != nil {
+		return nil
+	}
+
+	return &value
+}
+
+// Update
+// Updates an existing database entry with values from map.
+// Returns true if successful, false if not
+func (repository *Repository[T]) Update(id uuid.UUID, values any) bool {
+	query := repository.connection.
+		Model(repository.model).
+		Where("id = ?", id).
+		Updates(values)
+
+	if query.Error != nil {
+		return false
+	}
+
+	return true
 }
 
 // Query

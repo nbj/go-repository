@@ -8,10 +8,12 @@ import (
 	"gorm.io/gorm"
 )
 
-func SetupEnvironment() {
+func SetupEnvironment(noSeed ...bool) {
 	connection := getSqliteDatabaseConnection()
 
-	seedTestData(connection)
+	if len(noSeed) == 0 {
+		seedTestData(connection)
+	}
 
 	Repository.SetDefaultConfig(&Repository.Config{DatabaseConnection: connection})
 }

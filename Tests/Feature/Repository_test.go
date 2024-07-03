@@ -3,6 +3,7 @@ package Feature
 import (
 	"github.com/nbj/go-repository/Repository"
 	"github.com/nbj/go-repository/Tests"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 	"reflect"
@@ -93,4 +94,47 @@ func Test_a_repository_can_initiate_a_query_builder(t *testing.T) {
 
 	// Assert
 	require.Equal(t, "*Repository.QueryBuilder[github.com/nbj/go-repository/Tests.TestCaseModel]", reflect.TypeOf(builder).String())
+}
+
+func Test_a_repository_can_create_new_entries(t *testing.T) {
+	// Arrange
+	Tests.SetupEnvironment(true)
+
+	repository := Repository.Of[Tests.TestCaseModel]()
+	assert.Equal(t, 0, repository.All().Count())
+
+	// Act
+	repository.Create(Tests.TestCaseModel{
+		Value: "Value [NEW]",
+	})
+
+	// Assert
+	assert.Equal(t, 1, repository.All().Count())
+	assert.Equal(t, "Value [NEW]", repository.All().First().Value)
+}
+
+func Test_a_repository_can_update_entries(t *testing.T) {
+	// Arrange
+	Tests.SetupEnvironment(true)
+
+	repository := Repository.Of[Tests.TestCaseModel]()
+	assert.Equal(t, 0, repository.All().Count())
+
+	repository.Create(Tests.TestCaseModel{
+		Value: "Value [NEW]",
+	})
+
+	assert.Equal(t, 1, repository.All().Count())
+	assert.Equal(t, "Value [NEW]", repository.All().First().Value)
+
+	// Act
+	model := repository.All().First()
+
+	repository.Update(model.Id, map[string]any{
+		"value": "Value [UPDATED]",
+	})
+
+	// Assert
+	assert.Equal(t, 1, repository.All().Count())
+	assert.Equal(t, "Value [UPDATED]", repository.All().First().Value)
 }
