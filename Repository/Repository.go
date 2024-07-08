@@ -93,7 +93,7 @@ func (repository *Repository[T]) All() *Collection.Collection[T] {
 	query = repository.applyRelationships(query)
 
 	if result := query.Find(&entries); result.Error != nil {
-		return nil
+		panic("Repository[All]: " + result.Error.Error())
 	}
 
 	return Collection.Collect(entries)
@@ -103,7 +103,7 @@ func (repository *Repository[T]) All() *Collection.Collection[T] {
 // Creates a new database entry
 func (repository *Repository[T]) Create(value T) *T {
 	if result := repository.connection.Create(&value); result.Error != nil {
-		return nil
+		panic("Repository[Create]: " + result.Error.Error())
 	}
 
 	return &value
@@ -119,7 +119,7 @@ func (repository *Repository[T]) Update(id uuid.UUID, values any) bool {
 		Updates(values)
 
 	if query.Error != nil {
-		return false
+		panic("Repository[Update]: " + query.Error.Error())
 	}
 
 	return true
@@ -136,7 +136,7 @@ func (repository *Repository[T]) GormQuery(closure func(query *gorm.DB) *gorm.DB
 	query = repository.applyRelationships(query)
 
 	if result := query.Find(&entries); result.Error != nil {
-		return nil
+		panic("Repository[GormQuery]: " + result.Error.Error())
 	}
 
 	return Collection.Collect(entries)
@@ -153,7 +153,7 @@ func (repository *Repository[T]) First(closures ...func(query *gorm.DB) *gorm.DB
 	// If no closures are passed to the method
 	if len(closures) == 0 {
 		if result := query.First(&entry); result.Error != nil {
-			return nil
+			panic("Repository[First]: " + result.Error.Error())
 		}
 
 		return &entry
@@ -165,7 +165,7 @@ func (repository *Repository[T]) First(closures ...func(query *gorm.DB) *gorm.DB
 	}
 
 	if result := query.First(&entry); result.Error != nil {
-		return nil
+		panic("Repository[First]: " + result.Error.Error())
 	}
 
 	return &entry

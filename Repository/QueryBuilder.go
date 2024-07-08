@@ -57,7 +57,11 @@ func (builder *QueryBuilder[T]) Exists() bool {
 	var result *gorm.DB
 
 	if result = builder.query.First(&entries); result.Error != nil {
-		return false
+		if result.Error.Error() == "record not found" {
+			return false
+		}
+
+		panic("QueryBuilder[Exists]: " + result.Error.Error())
 	}
 
 	return result.RowsAffected != 0
@@ -71,7 +75,7 @@ func (builder *QueryBuilder[T]) Get() *Collection.Collection[T] {
 	builder.applyRelationships()
 
 	if result := builder.query.Find(&entries); result.Error != nil {
-		return nil
+		panic("QueryBuilder[Get]: " + result.Error.Error())
 	}
 
 	return Collection.Collect(entries)
@@ -94,7 +98,13 @@ func (builder *QueryBuilder[T]) First() *T {
 
 	builder.applyRelationships()
 
-	if result := builder.query.First(&entry); result.Error != nil || result.RowsAffected == 0 {
+	result := builder.query.First(&entry)
+
+	if result.Error != nil {
+		panic("QueryBuilder[First]: " + result.Error.Error())
+	}
+
+	if result.RowsAffected == 0 {
 		return nil
 	}
 
@@ -107,7 +117,7 @@ func (builder *QueryBuilder[T]) FirstOrFail() *T {
 	entry := builder.First()
 
 	if entry == nil {
-		panic("FirstOrFail: entry not found")
+		panic("QueryBuilder[FirstOrFail]: Model not found!")
 	}
 
 	return entry
