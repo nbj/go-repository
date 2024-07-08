@@ -73,7 +73,7 @@ func Test_query_builder_can_get_the_first_entry_or_fail(t *testing.T) {
 
 	defer func() {
 		if recover() != nil {
-			// Makes sure t.Fail() i never reached if a panic occurs
+			// Makes sure t.Fail() is never reached if a panic occurs
 		}
 	}()
 

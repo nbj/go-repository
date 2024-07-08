@@ -15,9 +15,10 @@ type WithRelationships interface {
 }
 
 type Repository[T any] struct {
-	connection *gorm.DB
-	model      *T
-	query      *gorm.DB
+	connection  *gorm.DB
+	model       *T
+	query       *gorm.DB
+	latestError error
 }
 
 type Config struct {
@@ -51,6 +52,12 @@ func Of[T any](config ...Config) *Repository[T] {
 // Sets the default configuration repositories will be instantiated with
 func SetDefaultConfig(config *Config) {
 	defaultConfiguration = config
+}
+
+// GetLatestError
+// Returns the latest error recorded
+func (repository *Repository[T]) GetLatestError() error {
+	return repository.latestError
 }
 
 // applyConfiguration
@@ -93,6 +100,7 @@ func (repository *Repository[T]) All() *Collection.Collection[T] {
 	query = repository.applyRelationships(query)
 
 	if result := query.Find(&entries); result.Error != nil {
+		repository.latestError = result.Error
 		panic("Repository[All]: " + result.Error.Error())
 	}
 
@@ -103,6 +111,7 @@ func (repository *Repository[T]) All() *Collection.Collection[T] {
 // Creates a new database entry
 func (repository *Repository[T]) Create(value T) *T {
 	if result := repository.connection.Create(&value); result.Error != nil {
+		repository.latestError = result.Error
 		panic("Repository[Create]: " + result.Error.Error())
 	}
 
@@ -119,6 +128,7 @@ func (repository *Repository[T]) Update(id uuid.UUID, values any) bool {
 		Updates(values)
 
 	if query.Error != nil {
+		repository.latestError = query.Error
 		panic("Repository[Update]: " + query.Error.Error())
 	}
 
@@ -136,6 +146,7 @@ func (repository *Repository[T]) GormQuery(closure func(query *gorm.DB) *gorm.DB
 	query = repository.applyRelationships(query)
 
 	if result := query.Find(&entries); result.Error != nil {
+		repository.latestError = result.Error
 		panic("Repository[GormQuery]: " + result.Error.Error())
 	}
 
@@ -153,6 +164,7 @@ func (repository *Repository[T]) First(closures ...func(query *gorm.DB) *gorm.DB
 	// If no closures are passed to the method
 	if len(closures) == 0 {
 		if result := query.First(&entry); result.Error != nil {
+			repository.latestError = result.Error
 			panic("Repository[First]: " + result.Error.Error())
 		}
 
@@ -165,6 +177,7 @@ func (repository *Repository[T]) First(closures ...func(query *gorm.DB) *gorm.DB
 	}
 
 	if result := query.First(&entry); result.Error != nil {
+		repository.latestError = result.Error
 		panic("Repository[First]: " + result.Error.Error())
 	}
 
