@@ -101,6 +101,10 @@ func (builder *QueryBuilder[T]) First() *T {
 	result := builder.query.First(&entry)
 
 	if result.Error != nil {
+		if result.Error.Error() == "record not found" {
+			return nil
+		}
+
 		panic("QueryBuilder[First]: " + result.Error.Error())
 	}
 
