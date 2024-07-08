@@ -15,7 +15,7 @@ type QueryBuilder[T any] struct {
 }
 
 func (builder *QueryBuilder[T]) With(query string, args ...any) *QueryBuilder[T] {
-	builder.query = builder.query.Preload(query, args)
+	builder.query = builder.query.Preload(query, args...)
 
 	return builder
 }
