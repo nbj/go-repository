@@ -1,6 +1,7 @@
 package Repository
 
 import (
+	"errors"
 	"github.com/google/uuid"
 	"github.com/nbj/go-collections/Collection"
 	"github.com/nbj/go-support/Support"
@@ -121,7 +122,7 @@ func (repository *Repository[T]) Create(value T) *T {
 // Update
 // Updates an existing database entry with values from map.
 // Returns true if successful, false if not
-func (repository *Repository[T]) Update(id uuid.UUID, values any) bool {
+func (repository *Repository[T]) Update(id uuid.UUID, values any) error {
 	query := repository.connection.
 		Model(repository.model).
 		Where("id = ?", id).
@@ -129,10 +130,17 @@ func (repository *Repository[T]) Update(id uuid.UUID, values any) bool {
 
 	if query.Error != nil {
 		repository.latestError = query.Error
-		panic("Repository[Update]: " + query.Error.Error())
+
+		return repository.latestError
 	}
 
-	return true
+	if query.RowsAffected == 0 {
+		repository.latestError = errors.New("Repository[Update]: No rows were affected")
+
+		return repository.latestError
+	}
+
+	return nil
 }
 
 // GormQuery
@@ -186,25 +194,26 @@ func (repository *Repository[T]) First(closures ...func(query *gorm.DB) *gorm.DB
 
 // Transaction
 // Performs a closure as a database transaction
-func (repository *Repository[T]) Transaction(closure func(transaction *Repository[T]) error) error {
-	// Start by making a copy of the repository, so we do not
-	// override the initiating repositories connection
-	transactionRepository := *Of[T]()
+func Transaction(closure func(transactionConfig Config) error) error {
+	// We start by creating the transaction
+	transaction := defaultConfiguration.DatabaseConnection.Begin()
 
-	// Start a new transaction
-	transactionRepository.connection = transactionRepository.connection.Begin()
+	// Create a transaction config to use for repositories inside
+	// the closure housing the transaction
+	transactionConfig := Config{
+		DatabaseConnection: transaction,
+	}
 
-	// Execute the closure, if any errors are returned, we
-	// will roll back the transaction and return the error
-	if err := closure(&transactionRepository); err != nil {
-		transactionRepository.latestError = err
-		transactionRepository.connection.Rollback()
+	// Pass config to closure and execute query. If any errors
+	// are produced, we roll back the transaction
+	if err := closure(transactionConfig); err != nil {
+		transaction.Rollback()
 
 		return err
 	}
 
-	// If everything went well we will commit the transaction
-	transactionRepository.connection.Commit()
+	// If everything went well we commit the transaction
+	transaction.Commit()
 
 	return nil
 }

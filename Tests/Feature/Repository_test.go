@@ -149,7 +149,9 @@ func Test_queries_can_be_performed_as_a_transaction(t *testing.T) {
 	assert.Equal(t, 0, repository.All().Count())
 
 	// Act
-	err := repository.Transaction(func(transaction *Repository.Repository[Tests.TestCaseModel]) error {
+	err := Repository.Transaction(func(config Repository.Config) error {
+		transaction := Repository.Of[Tests.TestCaseModel](config)
+
 		firstUuid, _ := uuid.NewV7()
 		secondUuid, _ := uuid.NewV7()
 
@@ -181,7 +183,9 @@ func Test_if_a_transaction_does_not_return_nil_it_is_rolled_back(t *testing.T) {
 	assert.Equal(t, 0, repository.All().Count())
 
 	// Act
-	err := repository.Transaction(func(transaction *Repository.Repository[Tests.TestCaseModel]) error {
+	err := Repository.Transaction(func(config Repository.Config) error {
+		transaction := Repository.Of[Tests.TestCaseModel](config)
+
 		firstUuid, _ := uuid.NewV7()
 		secondUuid, _ := uuid.NewV7()
 
