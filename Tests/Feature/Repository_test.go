@@ -1,6 +1,8 @@
 package Feature
 
 import (
+	"errors"
+	"github.com/google/uuid"
 	"github.com/nbj/go-repository/Repository"
 	"github.com/nbj/go-repository/Tests"
 	"github.com/stretchr/testify/assert"
@@ -137,4 +139,67 @@ func Test_a_repository_can_update_entries(t *testing.T) {
 	// Assert
 	assert.Equal(t, 1, repository.All().Count())
 	assert.Equal(t, "Value [UPDATED]", repository.All().First().Value)
+}
+
+func Test_queries_can_be_performed_as_a_transaction(t *testing.T) {
+	// Arrange
+	Tests.SetupEnvironment(true)
+
+	repository := Repository.Of[Tests.TestCaseModel]()
+	assert.Equal(t, 0, repository.All().Count())
+
+	// Act
+	err := repository.Transaction(func(transaction *Repository.Repository[Tests.TestCaseModel]) error {
+		firstUuid, _ := uuid.NewV7()
+		secondUuid, _ := uuid.NewV7()
+
+		transaction.Create(Tests.TestCaseModel{
+			Id:    firstUuid,
+			Value: "Value [NEW]",
+		})
+
+		transaction.Create(Tests.TestCaseModel{
+			Id:    secondUuid,
+			Value: "Value [MORE-NEW]",
+		})
+
+		return nil
+	})
+
+	// Assert
+	assert.Nil(t, err)
+	assert.Equal(t, 2, repository.All().Count())
+	assert.Equal(t, "Value [NEW]", repository.All().First().Value)
+	assert.Equal(t, "Value [MORE-NEW]", repository.All().Last().Value)
+}
+
+func Test_if_a_transaction_does_not_return_nil_it_is_rolled_back(t *testing.T) {
+	// Arrange
+	Tests.SetupEnvironment(true)
+
+	repository := Repository.Of[Tests.TestCaseModel]()
+	assert.Equal(t, 0, repository.All().Count())
+
+	// Act
+	err := repository.Transaction(func(transaction *Repository.Repository[Tests.TestCaseModel]) error {
+		firstUuid, _ := uuid.NewV7()
+		secondUuid, _ := uuid.NewV7()
+
+		transaction.Create(Tests.TestCaseModel{
+			Id:    firstUuid,
+			Value: "Value [NEW]",
+		})
+
+		transaction.Create(Tests.TestCaseModel{
+			Id:    secondUuid,
+			Value: "Value [MORE-NEW]",
+		})
+
+		return errors.New("this-transaction-will-not-be-commited")
+	})
+
+	// Assert
+	assert.NotNil(t, err)
+	assert.Equal(t, "this-transaction-will-not-be-commited", err.Error())
+	assert.Equal(t, 0, repository.All().Count())
 }

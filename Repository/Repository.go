@@ -183,3 +183,28 @@ func (repository *Repository[T]) First(closures ...func(query *gorm.DB) *gorm.DB
 
 	return &entry
 }
+
+// Transaction
+// Performs a closure as a database transaction
+func (repository *Repository[T]) Transaction(closure func(transaction *Repository[T]) error) error {
+	// Start by making a copy of the repository, so we do not
+	// override the initiating repositories connection
+	transactionRepository := *Of[T]()
+
+	// Start a new transaction
+	transactionRepository.connection = transactionRepository.connection.Begin()
+
+	// Execute the closure, if any errors are returned, we
+	// will roll back the transaction and return the error
+	if err := closure(&transactionRepository); err != nil {
+		transactionRepository.latestError = err
+		transactionRepository.connection.Rollback()
+
+		return err
+	}
+
+	// If everything went well we will commit the transaction
+	transactionRepository.connection.Commit()
+
+	return nil
+}
