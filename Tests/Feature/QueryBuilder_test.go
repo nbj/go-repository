@@ -233,3 +233,24 @@ func Test_query_builder_can_skip_n_and_take_n_entries(t *testing.T) {
 	assert.Equal(t, "Value [3]", collection.First().Value)
 	assert.Equal(t, "Value [4]", collection.Last().Value)
 }
+
+func Test_query_builder_can_delete_entries(t *testing.T) {
+	// Arrange
+	Tests.SetupEnvironment()
+
+	repository := Repository.Of[Tests.TestCaseModel]()
+	assert.Equal(t, 5, repository.All().Count())
+
+	// Act
+	repository.Query().
+		Where("value", "Value [1]").
+		OrWhere("value", "Value [5]").
+		Delete()
+
+	collection := repository.All()
+
+	// Assert
+	assert.Equal(t, 3, collection.Count())
+	assert.Equal(t, "Value [2]", collection.First().Value)
+	assert.Equal(t, "Value [4]", collection.Last().Value)
+}

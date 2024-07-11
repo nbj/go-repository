@@ -127,6 +127,18 @@ func (builder *QueryBuilder[T]) FirstOrFail() *T {
 	return entry
 }
 
+// Delete
+// Performs a delete query
+func (builder *QueryBuilder[T]) Delete() bool {
+	var model T
+
+	if result := builder.query.Delete(&model); result.Error != nil {
+		panic("QueryBuilder[Delete]: " + result.Error.Error())
+	}
+
+	return true
+}
+
 // applyRelationships
 // Applies any relationships set with the With() function on models
 func (builder *QueryBuilder[T]) applyRelationships() {
